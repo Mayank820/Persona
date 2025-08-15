@@ -1,0 +1,449 @@
+// ChatWindow.jsx
+import { gsap } from "gsap";
+import { useState, useEffect, useRef } from "react";
+import { useParams, Link } from "react-router-dom";
+import { FiSend, FiArrowLeft } from "react-icons/fi";
+
+const personas = {
+  hitesh: {
+    name: "Hitesh",
+    image: "https://avatars.githubusercontent.com/u/11613311?v=4",
+    accent: "from-cyan-500 to-blue-500",
+  },
+  piyush: {
+    name: "Piyush",
+    image: "https://avatars.githubusercontent.com/u/44976328?v=4",
+    accent: "from-rose-500 to-pink-500",
+  },
+};
+
+const TypingIndicator = ({ mentorImage, mentorName }) => (
+  <div className="flex items-end gap-3 animate-fade-in-up">
+    {/* FIX 1: Conditionally render the image to prevent empty src warning */}
+    <div className="message-item flex items-end gap-3">
+      {mentorImage && (
+        <img
+          src={mentorImage}
+          alt={mentorName}
+          className="w-8 h-8 rounded-full shadow-md"
+        />
+      )}
+      <div className="bg-slate-700 text-slate-200 rounded-t-2xl rounded-br-2xl p-4 flex items-center justify-center space-x-1.5">
+        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></span>
+        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-75"></span>
+        <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-150"></span>
+      </div>
+    </div>
+  </div>
+);
+
+export default function ChatWindow() {
+  const { persona } = useParams();
+  const mentor = personas[persona] || { name: persona, image: "" };
+
+  const [messages, setMessages] = useState([
+    {
+      sender: persona,
+      text: `Hello! I'm ${mentor.name}. How can I help you today?`,
+    },
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  // NEW: Add this useEffect to reset history when the component loads
+  useEffect(() => {
+    const resetChatHistory = async () => {
+      try {
+        await fetch("http://localhost:3000/api/chat/reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ persona }),
+        });
+      } catch (error) {
+        console.error("Failed to reset chat history:", error);
+      }
+    };
+
+    resetChatHistory();
+  }, [persona]); // It runs whenever the persona changes
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
+
+  // NEW: Animate header & input on mount
+  useEffect(() => {
+    gsap.from(".chat-header", {
+      y: -40,
+      opacity: 0,
+      duration: 0.7,
+      ease: "power2.out",
+    });
+    gsap.from(".chat-input", {
+      y: 40,
+      opacity: 0,
+      duration: 0.7,
+      delay: 0.2,
+      ease: "power2.out",
+    });
+  }, []);
+
+  // Animating new messages and typing indicator
+  useEffect(() => {
+    // Fade and rise latest message
+    const lastMsg = messagesEndRef.current?.previousSibling;
+    if (lastMsg) {
+      gsap.from(lastMsg, {
+        opacity: 0,
+        y: 24,
+        duration: 0.7,
+        ease: "power2.out",
+      });
+    }
+    // Animate TypingIndicator
+    const typing = document.querySelector(".chat-typing");
+    if (typing) {
+      gsap.fromTo(
+        typing,
+        { opacity: 0, y: 24 },
+        { opacity: 1, y: 0, duration: 0.7, ease: "power2.out" }
+      );
+    }
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages, isLoading]);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+
+    const newMessage = { sender: "user", text: input };
+    setMessages((prev) => [...prev, newMessage]);
+    setInput("");
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("http://localhost:3000/api/chat/stream", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: input, persona }),
+      });
+
+      if (!response.ok) {
+        // This is where the "Network response was not ok" error is thrown.
+        // The code correctly proceeds to the catch block.
+        throw new Error("Network response was not ok");
+      }
+
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let aiText = "";
+      let firstChunkReceived = false;
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+
+        if (!firstChunkReceived) {
+          setIsLoading(false);
+          setMessages((prev) => [...prev, { sender: persona, text: "" }]);
+          firstChunkReceived = true;
+        }
+
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const jsonStr = line.slice(6);
+            try {
+              if (jsonStr.trim() === "[DONE]") continue;
+              const parsed = JSON.parse(jsonStr);
+              if (parsed.token) {
+                aiText += parsed.token;
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1].text = aiText;
+                  return updated;
+                });
+              }
+            } catch (error) {
+              // Ignore parsing errors for incomplete JSON chunks which are common in streaming
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setMessages((prev) => [
+        ...prev,
+        {
+          sender: persona,
+          text: "Sorry, I encountered an error connecting to the server. Please try again later.",
+        },
+      ]);
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex flex-col bg-slate-900 text-slate-200 antialiased">
+      <header className="bg-slate-800/70 backdrop-blur-sm p-4 flex items-center gap-4 shadow-md sticky top-0 z-10">
+        <Link
+          to="/"
+          className="p-2 rounded-full hover:bg-slate-700 transition-colors"
+        >
+          <FiArrowLeft size={20} />
+        </Link>
+        {/* FIX 2: Conditionally render the image here as well */}
+        {mentor.image && (
+          <img
+            src={mentor.image}
+            alt={mentor.name}
+            className="w-10 h-10 rounded-full"
+          />
+        )}
+        <h1 className="text-xl font-bold capitalize">{mentor.name}</h1>
+      </header>
+
+      <div className="flex-1 overflow-y-auto p-6 space-y-6">
+        {messages.map((msg, i) => (
+          <div
+            key={i}
+            className={`flex items-end gap-3 animate-fade-in-up ${
+              msg.sender === "user" ? "justify-end" : "justify-start"
+            }`}
+          >
+            {msg.sender !== "user" &&
+              // FIX 3: And finally, fix the condition here
+              mentor.image && (
+                <img
+                  src={mentor.image}
+                  alt={mentor.name}
+                  className="w-8 h-8 rounded-full shadow-md"
+                />
+              )}
+            <div
+              className={`max-w-[70%] p-4 shadow-md ${
+                msg.sender === "user"
+                  ? `bg-gradient-to-br ${
+                      mentor.accent || "from-gray-500 to-gray-600"
+                    } text-white rounded-t-2xl rounded-bl-2xl`
+                  : "bg-slate-700 text-slate-200 rounded-t-2xl rounded-br-2xl"
+              }`}
+            >
+              <p className="whitespace-pre-wrap">{msg.text}</p>
+            </div>
+          </div>
+        ))}
+
+        {isLoading && (
+          <TypingIndicator
+            mentorImage={mentor.image}
+            mentorName={mentor.name}
+          />
+        )}
+
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="p-4 bg-slate-800/70 backdrop-blur-sm flex items-center gap-4 sticky bottom-0">
+        <input
+          type="text"
+          value={input}
+          placeholder="Ask your mentor anything..."
+          onChange={(e) => setInput(e.target.value)}
+          onKeyDown={(e) =>
+            e.key === "Enter" &&
+            !e.shiftKey &&
+            (e.preventDefault(), sendMessage())
+          }
+          className="flex-1 bg-slate-700 text-slate-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all w-full"
+        />
+        <button
+          onClick={sendMessage}
+          className={`p-3 rounded-full transition-all duration-200 ${
+            input.trim()
+              ? `bg-gradient-to-br ${
+                  mentor.accent || "from-gray-500 to-gray-600"
+                } text-white scale-100`
+              : "bg-slate-700 text-slate-400 scale-90"
+          }`}
+          disabled={!input.trim()}
+        >
+          <FiSend size={20} />
+        </button>
+      </div>
+    </div>
+  );
+}
+
+
+// ChatWindow.jsx
+import { gsap } from "gsap";
+import { useState, useEffect, useLayoutEffect, useRef } from "react";
+import { useParams, Link } from "react-router-dom";
+import { FiSend, FiArrowLeft } from "react-icons/fi";
+
+const personas = {
+  hitesh: {
+    name: "Hitesh",
+    image: "https://avatars.githubusercontent.com/u/11613311?v=4",
+    accent: "from-cyan-500 to-blue-500",
+  },
+  piyush: {
+    name: "Piyush",
+    image: "https://avatars.githubusercontent.com/u/44976328?v=4",
+    accent: "from-rose-500 to-pink-500",
+  },
+};
+
+const TypingIndicator = ({ mentorImage, mentorName }) => (
+  <div className="message-item flex items-end gap-3">
+    {mentorImage && <img src={mentorImage} alt={mentorName} className="w-8 h-8 rounded-full shadow-md" />}
+    <div className="bg-slate-700 text-slate-200 rounded-t-2xl rounded-br-2xl p-4 flex items-center justify-center space-x-1.5">
+      <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce"></span>
+      <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-75"></span>
+      <span className="w-2 h-2 bg-slate-400 rounded-full animate-bounce delay-150"></span>
+    </div>
+  </div>
+);
+
+export default function ChatWindow() {
+  const { persona } = useParams();
+  const mentor = personas[persona] || { name: persona, image: "" };
+
+  const [messages, setMessages] = useState([
+    { sender: persona, text: `Hello! I'm ${mentor.name}. How can I help you today?` }
+  ]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  
+  const main = useRef(null);
+  const messageContainerRef = useRef(null);
+  const messagesEndRef = useRef(null);
+
+  useEffect(() => {
+    const resetChatHistory = async () => {
+      try {
+        await fetch("http://localhost:3000/api/chat/reset", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ persona }),
+        });
+      } catch (error) {
+        console.error("Failed to reset chat history:", error);
+      }
+    };
+    resetChatHistory();
+  }, [persona]);
+
+  useLayoutEffect(() => {
+    const ctx = gsap.context(() => {
+      gsap.from(".chat-header", { y: -50, autoAlpha: 0, duration: 0.8, ease: "power3.out" });
+      gsap.from(".chat-input", { y: 50, autoAlpha: 0, duration: 0.8, ease: "power3.out" });
+      const initialMessage = messageContainerRef.current?.children[0];
+      if (initialMessage) {
+        gsap.from(initialMessage, { delay: 0.5, y: 30, autoAlpha: 0, duration: 0.8, ease: "power3.out" });
+      }
+    }, main);
+    return () => ctx.revert();
+  }, []);
+
+  useLayoutEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    const q = gsap.utils.selector(messageContainerRef);
+    const lastMessage = q(".message-item:last-child");
+
+    // FIX: Check if the element exists (lastMessage[0]) before accessing its properties
+    if (lastMessage[0] && !lastMessage[0].hasAttribute("data-animated")) {
+      gsap.from(lastMessage, {
+        y: 30,
+        autoAlpha: 0,
+        duration: 0.8,
+        ease: "power3.out",
+        onComplete: () => {
+          lastMessage[0].setAttribute("data-animated", "true");
+        },
+      });
+    }
+  }, [messages, isLoading]);
+
+  const sendMessage = async () => {
+    if (!input.trim()) return;
+    const newMessage = { sender: "user", text: input };
+    setMessages((prev) => [...prev, newMessage]);
+    setInput("");
+    setIsLoading(true);
+    try {
+      const response = await fetch("http://localhost:3000/api/chat/stream", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ message: input, persona }) });
+      if (!response.ok) { throw new Error("Network response was not ok"); }
+      const reader = response.body.getReader();
+      const decoder = new TextDecoder();
+      let aiText = "";
+      let firstChunkReceived = false;
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        if (!firstChunkReceived) {
+          setIsLoading(false);
+          setMessages((prev) => [...prev, { sender: persona, text: "" }]);
+          firstChunkReceived = true;
+        }
+        const chunk = decoder.decode(value, { stream: true });
+        const lines = chunk.split("\n");
+        for (const line of lines) {
+          if (line.startsWith("data: ")) {
+            const jsonStr = line.slice(6);
+            try {
+              if (jsonStr.trim() === "[DONE]") continue;
+              const parsed = JSON.parse(jsonStr);
+              if (parsed.token) {
+                aiText += parsed.token;
+                setMessages((prev) => {
+                  const updated = [...prev];
+                  updated[updated.length - 1].text = aiText;
+                  return updated;
+                });
+              }
+            } catch (error) {}
+          }
+        }
+      }
+    } catch (error) {
+      console.error("Error sending message:", error);
+      setMessages((prev) => [...prev, { sender: persona, text: "Sorry, I encountered an error connecting to the server. Please try again later." }]);
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div ref={main} className="min-h-screen flex flex-col bg-slate-900 text-slate-200 antialiased">
+      <header className="chat-header bg-slate-800/70 backdrop-blur-sm p-4 flex items-center gap-4 shadow-md sticky top-0 z-10">
+        <Link to="/" className="p-2 rounded-full hover:bg-slate-700 transition-colors">
+          <FiArrowLeft size={20} />
+        </Link>
+        {mentor.image && <img src={mentor.image} alt={mentor.name} className="w-10 h-10 rounded-full" />}
+        <h1 className="text-xl font-bold capitalize">{mentor.name}</h1>
+      </header>
+      
+      <div ref={messageContainerRef} className="flex-1 overflow-y-auto p-6 space-y-6">
+        {messages.map((msg, i) => (
+          <div key={i} className={`message-item flex items-end gap-3 ${msg.sender === "user" ? "justify-end" : "justify-start"}`}>
+            {msg.sender !== "user" && mentor.image && <img src={mentor.image} alt={mentor.name} className="w-8 h-8 rounded-full shadow-md" />}
+            <div className={`max-w-[70%] p-4 shadow-md ${msg.sender === "user" ? `bg-gradient-to-br ${mentor.accent || "from-gray-500 to-gray-600"} text-white rounded-t-2xl rounded-bl-2xl` : "bg-slate-700 text-slate-200 rounded-t-2xl rounded-br-2xl"}`}>
+              <p className="whitespace-pre-wrap">{msg.text}</p>
+            </div>
+          </div>
+        ))}
+        {isLoading && <TypingIndicator mentorImage={mentor.image} mentorName={mentor.name} />}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="chat-input p-4 bg-slate-800/70 backdrop-blur-sm flex items-center gap-4 sticky bottom-0">
+        <input type="text" value={input} placeholder="Ask your mentor anything..." onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && !e.shiftKey && (e.preventDefault(), sendMessage())} className="flex-1 bg-slate-700 text-slate-200 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-cyan-500 transition-all w-full" />
+        <button onClick={sendMessage} className={`p-3 rounded-full transition-all duration-200 ${input.trim() ? `bg-gradient-to-br ${mentor.accent || "from-gray-500 to-gray-600"} text-white scale-100` : "bg-slate-700 text-slate-400 scale-90"}`} disabled={!input.trim()}>
+          <FiSend size={20} />
+        </button>
+      </div>
+    </div>
+  );
+}

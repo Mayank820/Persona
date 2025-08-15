@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@layer utilities {
+  @keyframes fade-in-up {
+    from {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .animate-fade-in-up {
+    animation: fade-in-up 0.4s ease-out forwards;
+  }
+
+  /* Add the new bounce keyframes below */
+  @keyframes bounce {
+
+    0%,
+    100% {
+      transform: translateY(0);
+      animation-timing-function: cubic-bezier(0.8, 0, 1, 1);
+    }
+
+    50% {
+      transform: translateY(-25%);
+      animation-timing-function: cubic-bezier(0, 0, 0.2, 1);
+    }
+  }
+
+  /*
+    Tailwind can't directly configure animation-delay utilities before v3.0,
+    but adding them to your config or using arbitrary values like `delay-75` and `delay-150`
+    works in modern Tailwind. If not, define them here:
+  */
+  .delay-75 {
+    animation-delay: 75ms;
+  }
+
+  .delay-150 {
+    animation-delay: 150ms;
+  }
+
+  .animate-bounce {
+    animation: bounce 1s infinite;
+  }
+
+  body {
+    background-color: #2e2e2e;
+    /* A soft, matte black */
+    /* A subtle grain texture using an embedded SVG */
+    background-image: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 800"><g fill-opacity="0.12"><circle fill="%23fff" cx="200" cy="200" r="200"/><circle fill="%23121212" cx="100" cy="100" r="200"/><circle fill="%23222" cx="400" cy="400" r="120"/><circle fill="%23333" cx="600" cy="200" r="200"/><circle fill="%23444" cx="700" cy="500" r="150"/></g></svg>');
+    background-size: 512px;
+  }
+
+
+  /* UPDATED: Make the radial glow much more subtle for the matte theme */
+  .radial-glow {
+    background: radial-gradient(circle at center,
+        var(--accent-color) 0%,
+        rgba(0, 0, 0, 0) 55%
+        /* Make the glow fade out faster */
+      );
+    opacity: 0.35;
+    /* Reduce the overall intensity */
+  }
+
+  @keyframes subtle-pulse {
+    0%, 100% {
+      box-shadow: 0 0 15px -5px var(--accent-glow-color), 0 0 30px -15px var(--accent-glow-color);
+    }
+    50% {
+      box-shadow: 0 0 25px -5px var(--accent-glow-color), 0 0 40px -15px var(--accent-glow-color);
+    }
+  }
+
+}
