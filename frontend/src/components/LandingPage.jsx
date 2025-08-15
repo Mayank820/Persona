@@ -72,14 +72,12 @@ export default function LandingPage() {
       name: "Hitesh",
       tagline: "Keeps it real and practical.",
       image: "https://avatars.githubusercontent.com/u/11613311?v=4",
-      accentColor: "#06b6d4", // Cyan
     },
     {
       id: "piyush",
       name: "Piyush",
       tagline: "Learn and build, faster.",
       image: "https://avatars.githubusercontent.com/u/44976328?v=4",
-      accentColor: "#f43f5e", // Rose
     },
   ];
 
@@ -148,7 +146,6 @@ export default function LandingPage() {
       });
 
       masterTl
-        // THE FIX: Removed ".logo" from this animation so it stays on screen
         .to(".hero-section", {
           opacity: 0,
           yPercent: -25,
@@ -223,7 +220,6 @@ export default function LandingPage() {
       <div className="main-container relative h-screen w-full overflow-hidden">
         <section className="hero-section absolute inset-0 flex flex-col justify-center items-center text-center px-4">
           <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold leading-tight">
-            {/* UPDATED: Single-line title */}
             {chars}
           </h1>
           <p className="hero-subtitle text-base sm:text-lg md:text-xl text-zinc-400 max-w-3xl mt-6">
@@ -259,10 +255,7 @@ export default function LandingPage() {
             <div className="absolute inset-0 w-full h-full radial-glow"></div>
             <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-10 px-6">
               <div className="hitesh-details flex flex-col items-center md:items-start order-2 md:order-1">
-                <h3
-                  className="text-4xl sm:text-5xl font-bold"
-                  style={{ color: personas[0].accentColor }}
-                >
+                <h3 className="text-4xl sm:text-5xl font-bold text-zinc-100">
                   {personas[0].name}
                 </h3>
                 <p className="text-lg sm:text-xl text-zinc-400 mt-2">
@@ -305,10 +298,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="piyush-details flex flex-col items-center md:items-end text-center md:text-right order-2 md:order-2">
-                <h3
-                  className="text-4xl sm:text-5xl font-bold"
-                  style={{ color: personas[1].accentColor }}
-                >
+                <h3 className="text-4xl sm:text-5xl font-bold text-zinc-100">
                   {personas[1].name}
                 </h3>
                 <p className="text-lg sm:text-xl text-zinc-400 mt-2">
