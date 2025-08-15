@@ -4,6 +4,8 @@ import { useState, useEffect, useLayoutEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { FiSend, FiArrowLeft, FiUsers, FiX } from "react-icons/fi";
 
+const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3000';
+
 const personas = {
   hitesh: {
     name: "Hitesh Choudhary",
@@ -154,7 +156,7 @@ export default function ChatWindow() {
     if (messages.length <= 1) {
       const resetChatHistory = async () => {
         try {
-          await fetch("http://localhost:3000/api/chat/reset", {
+          await fetch(`${API_URL}/api/chat/reset`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({ persona }),
@@ -222,7 +224,7 @@ export default function ChatWindow() {
     setInput("");
     setIsLoading(true);
     try {
-      const response = await fetch("http://localhost:3000/api/chat/stream", {
+      const response = await fetch(`${API_URL}/api/chat/stream`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: input, persona }),
