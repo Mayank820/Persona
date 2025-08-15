@@ -9,23 +9,11 @@ import { FaArrowRight } from "react-icons/fa";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// UPDATED: Split title for two-line animation
-const heroTitleLine1 = "Welcome to AI Mentorship";
-const heroTitleLine2 = "CHAI AURA";
-
-const chars1 = heroTitleLine1.split("").map((char, index) => (
+const heroTitle = "Welcome to Chai Aura";
+const chars = heroTitle.split("").map((char, index) => (
   <span
     key={index}
-    className="hero-char-1 inline-block"
-    style={{ whiteSpace: "pre" }}
-  >
-    {char}
-  </span>
-));
-const chars2 = heroTitleLine2.split("").map((char, index) => (
-  <span
-    key={index}
-    className="hero-char-2 inline-block"
+    className="hero-char inline-block"
     style={{ whiteSpace: "pre" }}
   >
     {char}
@@ -83,14 +71,12 @@ export default function LandingPage() {
       name: "Hitesh",
       tagline: "Keeps it real and practical.",
       image: "https://avatars.githubusercontent.com/u/11613311?v=4",
-      accentColor: "#06b6d4", // Cyan
     },
     {
       id: "piyush",
       name: "Piyush",
       tagline: "Learn and build, faster.",
       image: "https://avatars.githubusercontent.com/u/44976328?v=4",
-      accentColor: "#f43f5e", // Rose
     },
   ];
 
@@ -109,10 +95,7 @@ export default function LandingPage() {
     gsap.ticker.lagSmoothing(0);
 
     let ctx = gsap.context(() => {
-      gsap.set([".hero-char-1", ".hero-char-2"], {
-        yPercent: 100,
-        autoAlpha: 0,
-      });
+      gsap.set(".hero-char", { yPercent: 100, autoAlpha: 0 });
       gsap.set(".hero-subtitle", { y: 30, autoAlpha: 0 });
       gsap.set([".choose-mentor-title", ".choose-mentor-subtitle"], {
         yPercent: 25,
@@ -133,28 +116,18 @@ export default function LandingPage() {
         },
       });
 
-      // UPDATED: Animate both lines of the title
-      gsap.to(".hero-char-1", {
-        autoAlpha: 1,
-        yPercent: 0,
-        stagger: 0.03,
-        duration: 1,
-        ease: "power3.out",
-      });
-      gsap.to(".hero-char-2", {
-        delay: 0.2,
-        autoAlpha: 1,
-        yPercent: 0,
-        stagger: 0.05,
-        duration: 1,
-        ease: "power3.out",
-      });
-
       gsap.to(".logo", {
         delay: 1,
         autoAlpha: 1,
         y: 0,
         duration: 0.8,
+        ease: "power3.out",
+      });
+      gsap.to(".hero-char", {
+        autoAlpha: 1,
+        yPercent: 0,
+        stagger: 0.05,
+        duration: 1,
         ease: "power3.out",
       });
       gsap.to(".hero-subtitle", {
@@ -239,18 +212,16 @@ export default function LandingPage() {
 
   return (
     <div ref={component} className="text-zinc-200 antialiased">
+      {/* RESPONSIVE: Adjusted logo position for smaller screens */}
       <div className="logo fixed top-6 left-6 sm:top-8 sm:left-8 z-20">
         <Logo />
       </div>
 
       <div className="main-container relative h-screen w-full overflow-hidden">
         <section className="hero-section absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold leading-tight flex flex-col items-center">
-            {/* UPDATED: Two-line title structure */}
-            <span className="block">{chars1}</span>
-            <span className="block mt-2 sm:mt-4 text-5xl sm:text-7xl md:text-8xl bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">
-              {chars2}
-            </span>
+          {/* RESPONSIVE: Adjusted font sizes for hero text */}
+          <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold leading-tight">
+            {chars}
           </h1>
           <p className="hero-subtitle text-base sm:text-lg md:text-xl text-zinc-400 max-w-3xl mt-6">
             Engage in meaningful conversations with AI personas modeled after
@@ -263,12 +234,9 @@ export default function LandingPage() {
         </section>
 
         <section className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
+          {/* RESPONSIVE: Adjusted font sizes */}
           <h2 className="choose-mentor-title text-4xl sm:text-5xl md:text-6xl font-bold text-zinc-200">
-            {/* UPDATED: "Mentor" with gradient color */}
-            Choose Your{" "}
-            <span className="bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">
-              Mentor
-            </span>
+            Choose Your Mentor
           </h2>
           <p className="choose-mentor-subtitle text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mt-4">
             Each mentor offers a unique perspective. Select the one whose
@@ -284,13 +252,10 @@ export default function LandingPage() {
             style={{ "--accent-color": "rgba(0, 255, 255, 0.1)" }}
           >
             <div className="absolute inset-0 w-full h-full radial-glow"></div>
+            {/* RESPONSIVE: Changed grid to flex for better control on mobile */}
             <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-10 px-6">
               <div className="hitesh-details flex flex-col items-center md:items-start order-2 md:order-1">
-                {/* UPDATED: Mentor name with accent color */}
-                <h3
-                  className="text-4xl sm:text-5xl font-bold"
-                  style={{ color: personas[0].accentColor }}
-                >
+                <h3 className="text-4xl sm:text-5xl font-bold text-zinc-100">
                   {personas[0].name}
                 </h3>
                 <p className="text-lg sm:text-xl text-zinc-400 mt-2">
@@ -305,6 +270,7 @@ export default function LandingPage() {
                 </button>
               </div>
               <div className="hitesh-image-wrapper flex justify-center order-1 md:order-2">
+                {/* RESPONSIVE: Adjusted image size */}
                 <div className="hitesh-image w-56 h-56 sm:w-64 sm:h-64 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl shadow-black">
                   <img
                     src={personas[0].image}
@@ -333,11 +299,7 @@ export default function LandingPage() {
                 </div>
               </div>
               <div className="piyush-details flex flex-col items-center md:items-end text-center md:text-right order-2 md:order-2">
-                {/* UPDATED: Mentor name with accent color */}
-                <h3
-                  className="text-4xl sm:text-5xl font-bold"
-                  style={{ color: personas[1].accentColor }}
-                >
+                <h3 className="text-4xl sm:text-5xl font-bold text-zinc-100">
                   {personas[1].name}
                 </h3>
                 <p className="text-lg sm:text-xl text-zinc-400 mt-2">
