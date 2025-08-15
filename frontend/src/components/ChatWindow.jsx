@@ -47,15 +47,16 @@ const SwitchMentorModal = ({ isOpen, onClose, currentPersonaId, onSelect }) => {
   return (
     <div
       ref={modalRef}
-      className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 invisible"
+      className="fixed inset-0 bg-black/60 backdrop-blur-md flex justify-center items-center z-50 invisible p-4"
       onClick={onClose}
     >
+      {/* RESPONSIVE: Adjusted modal width */}
       <div
-        className="bg-zinc-900/80 ring-1 ring-white/10 p-8 rounded-2xl w-full max-w-md"
+        className="bg-zinc-900/80 ring-1 ring-white/10 p-6 sm:p-8 rounded-2xl w-full max-w-sm"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold text-zinc-100">Switch Mentor</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-zinc-100">Switch Mentor</h2>
           <button
             onClick={onClose}
             className="p-2 rounded-full hover:bg-zinc-700 transition-colors"
@@ -251,13 +252,7 @@ export default function ChatWindow() {
             const jsonStr = line.slice(6);
             try {
               const parsed = JSON.parse(jsonStr);
-
-              // THE FIX: Check the token's content. If it's "[DONE]", skip this iteration.
-              if (parsed.token && parsed.token === "[DONE]") {
-                continue;
-              }
-
-              if (parsed.token) {
+              if (parsed.token && parsed.token !== "[DONE]") {
                 aiText += parsed.token;
                 setMessages((prev) => {
                   const updated = [...prev];
@@ -323,7 +318,7 @@ export default function ChatWindow() {
               <div className="absolute -inset-1 rounded-full animate-[subtle-pulse_4s_ease-in-out_infinite]"></div>
             </div>
           )}
-          <h1 className="text-xl font-bold text-zinc-100 capitalize">
+          <h1 className="text-lg sm:text-xl font-bold text-zinc-100 capitalize">
             {mentor.name}
           </h1>
           <button
@@ -337,7 +332,7 @@ export default function ChatWindow() {
 
         <div
           ref={messageContainerRef}
-          className="flex-1 overflow-y-auto p-6 space-y-6"
+          className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-6"
         >
           {messages.map((msg, i) => (
             <div
@@ -350,11 +345,12 @@ export default function ChatWindow() {
                 <img
                   src={mentor.image}
                   alt={mentor.name}
-                  className="w-8 h-8 rounded-full shadow-md"
+                  className="w-8 h-8 rounded-full shadow-md self-end"
                 />
               )}
+              {/* RESPONSIVE: Adjusted message bubble width for mobile */}
               <div
-                className={`max-w-[70%] p-4 shadow-lg ${
+                className={`max-w-[85%] sm:max-w-[70%] p-4 shadow-lg ${
                   msg.sender === "user"
                     ? `bg-gradient-to-br ${mentor.accent} text-white rounded-t-2xl rounded-bl-2xl`
                     : "bg-zinc-800 text-zinc-200 rounded-t-2xl rounded-br-2xl"
@@ -373,7 +369,7 @@ export default function ChatWindow() {
           <div ref={messagesEndRef} />
         </div>
 
-        <div className="chat-input p-4 bg-zinc-900/50 backdrop-blur-lg flex items-center gap-4 sticky bottom-0 border-t border-zinc-800">
+        <div className="chat-input p-2 sm:p-4 bg-zinc-900/50 backdrop-blur-lg flex items-center gap-2 sm:gap-4 sticky bottom-0 border-t border-zinc-800">
           <input
             type="text"
             value={input}

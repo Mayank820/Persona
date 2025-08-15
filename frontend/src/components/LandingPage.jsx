@@ -9,7 +9,6 @@ import { FaArrowRight } from "react-icons/fa";
 
 gsap.registerPlugin(ScrollTrigger);
 
-// UPDATED: New heading text
 const heroTitle = "Welcome to Chai Aura";
 const chars = heroTitle.split("").map((char, index) => (
   <span
@@ -21,7 +20,6 @@ const chars = heroTitle.split("").map((char, index) => (
   </span>
 ));
 
-// NEW: SVG Logo Component
 const Logo = () => (
   <svg
     width="64"
@@ -106,7 +104,7 @@ export default function LandingPage() {
       gsap.set(".hitesh-details", { x: -30, autoAlpha: 0 });
       gsap.set(".piyush-details", { x: 30, autoAlpha: 0 });
       gsap.set([".hitesh-section", ".piyush-section"], { autoAlpha: 0 });
-      gsap.set(".logo", { y: -20, autoAlpha: 0 }); // NEW: Set initial state for logo
+      gsap.set(".logo", { y: -20, autoAlpha: 0 });
 
       const masterTl = gsap.timeline({
         scrollTrigger: {
@@ -118,14 +116,13 @@ export default function LandingPage() {
         },
       });
 
-      // --- INTRO ANIMATIONS ---
       gsap.to(".logo", {
         delay: 1,
         autoAlpha: 1,
         y: 0,
         duration: 0.8,
         ease: "power3.out",
-      }); // NEW: Animate logo in
+      });
       gsap.to(".hero-char", {
         autoAlpha: 1,
         yPercent: 0,
@@ -147,13 +144,12 @@ export default function LandingPage() {
         duration: 0.8,
       });
 
-      // --- SCROLL-DRIVEN ANIMATIONS ---
       masterTl
         .to([".hero-section", ".logo"], {
           opacity: 0,
           yPercent: -25,
           duration: 1,
-        }) // UPDATED: Fade out logo with hero
+        })
         .to(
           [".choose-mentor-title", ".choose-mentor-subtitle"],
           { autoAlpha: 1, yPercent: 0, stagger: 0.2, duration: 1 },
@@ -216,17 +212,18 @@ export default function LandingPage() {
 
   return (
     <div ref={component} className="text-zinc-200 antialiased">
-      {/* NEW: Added Logo to the top left */}
-      <div className="logo fixed top-8 left-8 z-20">
+      {/* RESPONSIVE: Adjusted logo position for smaller screens */}
+      <div className="logo fixed top-6 left-6 sm:top-8 sm:left-8 z-20">
         <Logo />
       </div>
 
       <div className="main-container relative h-screen w-full overflow-hidden">
         <section className="hero-section absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-          <h1 className="text-5xl md:text-8xl font-bold leading-tight">
+          {/* RESPONSIVE: Adjusted font sizes for hero text */}
+          <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold leading-tight">
             {chars}
           </h1>
-          <p className="hero-subtitle text-lg md:text-xl text-zinc-400 max-w-3xl mt-6">
+          <p className="hero-subtitle text-base sm:text-lg md:text-xl text-zinc-400 max-w-3xl mt-6">
             Engage in meaningful conversations with AI personas modeled after
             the brightest minds in technology. Your journey to mastery starts
             here.
@@ -237,10 +234,11 @@ export default function LandingPage() {
         </section>
 
         <section className="absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-          <h2 className="choose-mentor-title text-4xl md:text-6xl font-bold text-zinc-200">
+          {/* RESPONSIVE: Adjusted font sizes */}
+          <h2 className="choose-mentor-title text-4xl sm:text-5xl md:text-6xl font-bold text-zinc-200">
             Choose Your Mentor
           </h2>
-          <p className="choose-mentor-subtitle text-lg md:text-xl text-zinc-400 max-w-2xl mt-4">
+          <p className="choose-mentor-subtitle text-base sm:text-lg md:text-xl text-zinc-400 max-w-2xl mt-4">
             Each mentor offers a unique perspective. Select the one whose
             approach resonates with you to begin a personalized learning
             experience.
@@ -254,12 +252,13 @@ export default function LandingPage() {
             style={{ "--accent-color": "rgba(0, 255, 255, 0.1)" }}
           >
             <div className="absolute inset-0 w-full h-full radial-glow"></div>
-            <div className="w-full h-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-10 px-6">
-              <div className="hitesh-details flex flex-col items-center md:items-start">
-                <h3 className="text-5xl font-bold text-zinc-100">
+            {/* RESPONSIVE: Changed grid to flex for better control on mobile */}
+            <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-10 px-6">
+              <div className="hitesh-details flex flex-col items-center md:items-start order-2 md:order-1">
+                <h3 className="text-4xl sm:text-5xl font-bold text-zinc-100">
                   {personas[0].name}
                 </h3>
-                <p className="text-xl text-zinc-400 mt-2">
+                <p className="text-lg sm:text-xl text-zinc-400 mt-2">
                   {personas[0].tagline}
                 </p>
                 <button
@@ -270,8 +269,9 @@ export default function LandingPage() {
                   <FaArrowRight className="transition-transform group-hover:translate-x-1" />
                 </button>
               </div>
-              <div className="hitesh-image-wrapper flex justify-center">
-                <div className="hitesh-image w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl shadow-black">
+              <div className="hitesh-image-wrapper flex justify-center order-1 md:order-2">
+                {/* RESPONSIVE: Adjusted image size */}
+                <div className="hitesh-image w-56 h-56 sm:w-64 sm:h-64 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl shadow-black">
                   <img
                     src={personas[0].image}
                     alt={personas[0].name}
@@ -288,9 +288,9 @@ export default function LandingPage() {
             style={{ "--accent-color": "rgba(255, 22, 84, 0.1)" }}
           >
             <div className="absolute inset-0 w-full h-full radial-glow"></div>
-            <div className="w-full h-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-10 px-6">
-              <div className="piyush-image-wrapper flex justify-center">
-                <div className="piyush-image w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl shadow-black">
+            <div className="w-full h-full max-w-6xl mx-auto flex flex-col md:flex-row items-center justify-center md:justify-between gap-10 px-6">
+              <div className="piyush-image-wrapper flex justify-center order-1 md:order-1">
+                <div className="piyush-image w-56 h-56 sm:w-64 sm:h-64 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl shadow-black">
                   <img
                     src={personas[1].image}
                     alt={personas[1].name}
@@ -298,11 +298,11 @@ export default function LandingPage() {
                   />
                 </div>
               </div>
-              <div className="piyush-details flex flex-col items-center md:items-end text-center md:text-right">
-                <h3 className="text-5xl font-bold text-zinc-100">
+              <div className="piyush-details flex flex-col items-center md:items-end text-center md:text-right order-2 md:order-2">
+                <h3 className="text-4xl sm:text-5xl font-bold text-zinc-100">
                   {personas[1].name}
                 </h3>
-                <p className="text-xl text-zinc-400 mt-2">
+                <p className="text-lg sm:text-xl text-zinc-400 mt-2">
                   {personas[1].tagline}
                 </p>
                 <button
