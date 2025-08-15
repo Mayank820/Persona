@@ -5,7 +5,7 @@ import chatRoutes from "./routes/chat.routes.js";
 const app = express();
 app.use(
   cors({
-    origin: ["http://localhost:5173", "https://persona-drab-tau.vercel.app"],
+    origin: ["http://localhost:5173", "https://persona-git-main-mayank820s-projects.vercel.app"],
     credentials: true,
     optionsSuccessStatus: 200,
     methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
