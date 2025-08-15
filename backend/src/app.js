@@ -5,7 +5,9 @@ import chatRoutes from "./routes/chat.routes.js";
 const app = express();
 const allowedOrigins = [
   "http://localhost:5173",
+  "https://persona-drab-tau.vercel.app",
   "https://persona-git-main-mayank820s-projects.vercel.app",
+  "https://persona-piifwrqv2-mayank820s-projects.vercel.app"
 ];
 
 // 2. Create the CORS options with a function
