@@ -9,7 +9,8 @@ import { FaArrowRight } from "react-icons/fa";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const heroTitle = "Welcome to AI Mentorship";
+// UPDATED: New heading text
+const heroTitle = "Welcome to Chai Aura";
 const chars = heroTitle.split("").map((char, index) => (
   <span
     key={index}
@@ -20,6 +21,48 @@ const chars = heroTitle.split("").map((char, index) => (
   </span>
 ));
 
+// NEW: SVG Logo Component
+const Logo = () => (
+  <svg
+    width="64"
+    height="64"
+    viewBox="0 0 64 64"
+    fill="none"
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path
+      d="M52 26C52 33.732 45.732 40 38 40H18C10.268 40 4 33.732 4 26V22"
+      stroke="#A1A1AA"
+      strokeWidth="2"
+    />
+    <path
+      d="M52 26H58C60.2091 26 62 27.7909 62 30V30C62 32.2091 60.2091 34 58 34H52"
+      stroke="#A1A1AA"
+      strokeWidth="2"
+    />
+    <path
+      d="M14 12L16.2857 16L21.1429 8L23.4286 16L28.2857 10L30.5714 16L35.4286 12"
+      stroke="#A1A1AA"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+    />
+    <defs>
+      <radialGradient
+        id="aura-glow"
+        cx="0"
+        cy="0"
+        r="1"
+        gradientUnits="userSpaceOnUse"
+        gradientTransform="translate(28 28) rotate(90) scale(28)"
+      >
+        <stop stopColor="#00FFFF" stopOpacity="0.3" />
+        <stop offset="1" stopColor="#121212" stopOpacity="0" />
+      </radialGradient>
+    </defs>
+    <rect x="0" y="0" width="56" height="56" fill="url(#aura-glow)" />
+  </svg>
+);
+
 export default function LandingPage() {
   const navigate = useNavigate();
   const component = useRef(null);
@@ -27,13 +70,13 @@ export default function LandingPage() {
   const personas = [
     {
       id: "hitesh",
-      name: "Hitesh Choudhary",
+      name: "Hitesh",
       tagline: "Keeps it real and practical.",
       image: "https://avatars.githubusercontent.com/u/11613311?v=4",
     },
     {
       id: "piyush",
-      name: "Piyush Garg",
+      name: "Piyush",
       tagline: "Learn and build, faster.",
       image: "https://avatars.githubusercontent.com/u/44976328?v=4",
     },
@@ -54,7 +97,6 @@ export default function LandingPage() {
     gsap.ticker.lagSmoothing(0);
 
     let ctx = gsap.context(() => {
-      // Set initial states to prevent FOUC. GSAP will animate TO these states.
       gsap.set(".hero-char", { yPercent: 100, autoAlpha: 0 });
       gsap.set(".hero-subtitle", { y: 30, autoAlpha: 0 });
       gsap.set([".choose-mentor-title", ".choose-mentor-subtitle"], {
@@ -64,6 +106,7 @@ export default function LandingPage() {
       gsap.set(".hitesh-details", { x: -30, autoAlpha: 0 });
       gsap.set(".piyush-details", { x: 30, autoAlpha: 0 });
       gsap.set([".hitesh-section", ".piyush-section"], { autoAlpha: 0 });
+      gsap.set(".logo", { y: -20, autoAlpha: 0 }); // NEW: Set initial state for logo
 
       const masterTl = gsap.timeline({
         scrollTrigger: {
@@ -76,6 +119,13 @@ export default function LandingPage() {
       });
 
       // --- INTRO ANIMATIONS ---
+      gsap.to(".logo", {
+        delay: 1,
+        autoAlpha: 1,
+        y: 0,
+        duration: 0.8,
+        ease: "power3.out",
+      }); // NEW: Animate logo in
       gsap.to(".hero-char", {
         autoAlpha: 1,
         yPercent: 0,
@@ -99,7 +149,11 @@ export default function LandingPage() {
 
       // --- SCROLL-DRIVEN ANIMATIONS ---
       masterTl
-        .to(".hero-section", { opacity: 0, yPercent: -25, duration: 1 })
+        .to([".hero-section", ".logo"], {
+          opacity: 0,
+          yPercent: -25,
+          duration: 1,
+        }) // UPDATED: Fade out logo with hero
         .to(
           [".choose-mentor-title", ".choose-mentor-subtitle"],
           { autoAlpha: 1, yPercent: 0, stagger: 0.2, duration: 1 },
@@ -111,7 +165,6 @@ export default function LandingPage() {
           "+=1.5"
         )
 
-        // Hitesh Reveal
         .to(".hitesh-section", { autoAlpha: 1, duration: 0.1 })
         .from(".hitesh-section", {
           xPercent: -100,
@@ -125,7 +178,6 @@ export default function LandingPage() {
         )
         .to(".hitesh-details", { autoAlpha: 1, x: 0, duration: 1 }, "-=0.5")
 
-        // Hitesh Exit (Smoother)
         .to(
           ".hitesh-details",
           { autoAlpha: 0, x: -30, duration: 0.75 },
@@ -142,7 +194,6 @@ export default function LandingPage() {
           "<"
         )
 
-        // Piyush Reveal
         .to(".piyush-section", { autoAlpha: 1, duration: 0.1 }, "-=1.5")
         .from(
           ".piyush-section",
@@ -165,6 +216,11 @@ export default function LandingPage() {
 
   return (
     <div ref={component} className="text-zinc-200 antialiased">
+      {/* NEW: Added Logo to the top left */}
+      <div className="logo fixed top-8 left-8 z-20">
+        <Logo />
+      </div>
+
       <div className="main-container relative h-screen w-full overflow-hidden">
         <section className="hero-section absolute inset-0 flex flex-col justify-center items-center text-center px-4">
           <h1 className="text-5xl md:text-8xl font-bold leading-tight">
@@ -199,7 +255,6 @@ export default function LandingPage() {
           >
             <div className="absolute inset-0 w-full h-full radial-glow"></div>
             <div className="w-full h-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-10 px-6">
-              {/* FIX: Consistent layout structure */}
               <div className="hitesh-details flex flex-col items-center md:items-start">
                 <h3 className="text-5xl font-bold text-zinc-100">
                   {personas[0].name}
@@ -234,7 +289,6 @@ export default function LandingPage() {
           >
             <div className="absolute inset-0 w-full h-full radial-glow"></div>
             <div className="w-full h-full max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-10 px-6">
-              {/* FIX: Consistent layout structure, reversed order */}
               <div className="piyush-image-wrapper flex justify-center">
                 <div className="piyush-image w-64 h-64 md:w-96 md:h-96 rounded-full overflow-hidden shadow-2xl shadow-black">
                   <img
@@ -244,7 +298,6 @@ export default function LandingPage() {
                   />
                 </div>
               </div>
-              {/* FIX: Symmetrical alignment */}
               <div className="piyush-details flex flex-col items-center md:items-end text-center md:text-right">
                 <h3 className="text-5xl font-bold text-zinc-100">
                   {personas[1].name}
