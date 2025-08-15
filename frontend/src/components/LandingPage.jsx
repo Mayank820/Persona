@@ -9,22 +9,12 @@ import { FaArrowRight } from "react-icons/fa";
 
 gsap.registerPlugin(ScrollTrigger);
 
-const heroTitleLine1 = "Welcome to AI Mentorship";
-const heroTitleLine2 = "CHAI AURA";
-
-const chars1 = heroTitleLine1.split("").map((char, index) => (
+// UPDATED: Combined title into a single line
+const heroTitle = "Welcome to Chai Aura";
+const chars = heroTitle.split("").map((char, index) => (
   <span
     key={index}
-    className="hero-char-1 inline-block"
-    style={{ whiteSpace: "pre" }}
-  >
-    {char}
-  </span>
-));
-const chars2 = heroTitleLine2.split("").map((char, index) => (
-  <span
-    key={index}
-    className="hero-char-2 inline-block"
+    className="hero-char inline-block"
     style={{ whiteSpace: "pre" }}
   >
     {char}
@@ -108,10 +98,7 @@ export default function LandingPage() {
     gsap.ticker.lagSmoothing(0);
 
     let ctx = gsap.context(() => {
-      gsap.set([".hero-char-1", ".hero-char-2"], {
-        yPercent: 100,
-        autoAlpha: 0,
-      });
+      gsap.set(".hero-char", { yPercent: 100, autoAlpha: 0 });
       gsap.set(".hero-subtitle", { y: 30, autoAlpha: 0 });
       gsap.set([".choose-mentor-title", ".choose-mentor-subtitle"], {
         yPercent: 25,
@@ -139,15 +126,7 @@ export default function LandingPage() {
         duration: 0.8,
         ease: "power3.out",
       });
-      gsap.to(".hero-char-1", {
-        autoAlpha: 1,
-        yPercent: 0,
-        stagger: 0.03,
-        duration: 1,
-        ease: "power3.out",
-      });
-      gsap.to(".hero-char-2", {
-        delay: 0.2,
+      gsap.to(".hero-char", {
         autoAlpha: 1,
         yPercent: 0,
         stagger: 0.05,
@@ -169,8 +148,12 @@ export default function LandingPage() {
       });
 
       masterTl
-        // THE FIX: Removed ".logo" from this line
-        .to(".hero-section", { opacity: 0, yPercent: -25, duration: 1 })
+        // THE FIX: Removed ".logo" from this animation so it stays on screen
+        .to(".hero-section", {
+          opacity: 0,
+          yPercent: -25,
+          duration: 1,
+        })
         .to(
           [".choose-mentor-title", ".choose-mentor-subtitle"],
           { autoAlpha: 1, yPercent: 0, stagger: 0.2, duration: 1 },
@@ -239,11 +222,9 @@ export default function LandingPage() {
 
       <div className="main-container relative h-screen w-full overflow-hidden">
         <section className="hero-section absolute inset-0 flex flex-col justify-center items-center text-center px-4">
-          <h1 className="text-4xl sm:text-6xl md:text-7xl font-bold leading-tight flex flex-col items-center">
-            <span className="block">{chars1}</span>
-            <span className="block mt-2 sm:mt-4 text-5xl sm:text-7xl md:text-8xl bg-gradient-to-r from-fuchsia-500 to-cyan-500 bg-clip-text text-transparent">
-              {chars2}
-            </span>
+          <h1 className="text-5xl sm:text-7xl md:text-8xl font-bold leading-tight">
+            {/* UPDATED: Single-line title */}
+            {chars}
           </h1>
           <p className="hero-subtitle text-base sm:text-lg md:text-xl text-zinc-400 max-w-3xl mt-6">
             Engage in meaningful conversations with AI personas modeled after
